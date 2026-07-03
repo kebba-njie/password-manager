@@ -1,0 +1,47 @@
+[
+    {
+        "website": "google",
+        "username": "test",
+        "password": "1234"
+    },
+    {
+        "website": "facebook",
+        "username": "tech",
+        "password": "345260"
+    },
+    {
+        "website": "facebook",
+        "username": "hamza",
+        "password": "12345"
+    },
+    {
+        "website": "facebook",
+        "username": "hamza",
+        "password": "12345"
+    },
+    {
+        "website": "facebook",
+        "username": "hamza",
+        "password": "1234"
+    },
+    {
+        "website": "\"C:\\Users\\DELL USER\\AppData\\Local\\Programs\\Python\\Python314\\python.exe\" \"c:/Users/DELL USER/OneDrive/Documents/main.py/manager.py\"",
+        "username": "hamza",
+        "password": "12345"
+    },
+    {
+        "website": "facebook",
+        "username": "hamza",
+        "password": "1234"
+    },
+    {
+        "website": "facebook",
+        "username": "hamza",
+        "password": "12345"
+    },
+    {
+        "website": "google account.com",
+        "username": "hamza ceesay",
+        "password": "222222"
+    }
+]
