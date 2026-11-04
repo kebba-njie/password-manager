@@ -29,13 +29,14 @@ def view_passwords():
         print("No passwords saved yet.")
         return
 
-    print("\nSAVED PASSWORDS:")
+    print("\nSAVED PASSWORDS")
+    print("----------------------")
 
     for item in data:
-        print("----------------------")
         print("Website:", item["website"])
         print("Username:", item["username"])
-        print("Password:", item["password"])
+        print("Password: ********")
+        print("----------------------")
 
 
 def analyze_password_strength():
@@ -114,22 +115,22 @@ def generate_password():
             print("Password length must be between 8 and 64.")
             return
 
-        lowercase = string.ascii_lowercase
-        uppercase = string.ascii_uppercase
-        digits = string.digits
-        symbols = string.punctuation
+        characters = (
+            string.ascii_lowercase
+            + string.ascii_uppercase
+            + string.digits
+            + string.punctuation
+        )
 
         password = [
-            secrets.choice(lowercase),
-            secrets.choice(uppercase),
-            secrets.choice(digits),
-            secrets.choice(symbols)
+            secrets.choice(string.ascii_lowercase),
+            secrets.choice(string.ascii_uppercase),
+            secrets.choice(string.digits),
+            secrets.choice(string.punctuation)
         ]
 
-        all_characters = lowercase + uppercase + digits + symbols
-
         for _ in range(length - 4):
-            password.append(secrets.choice(all_characters))
+            password.append(secrets.choice(characters))
 
         secrets.SystemRandom().shuffle(password)
 
@@ -143,21 +144,11 @@ def generate_password():
 
 def detect_common_password():
     common_passwords = {
-        "123456",
-        "password",
-        "123456789",
-        "12345678",
-        "qwerty",
-        "abc123",
-        "password123",
-        "admin",
-        "admin123",
-        "letmein",
-        "welcome",
-        "iloveyou",
-        "111111",
-        "000000",
-        "123123"
+        "123456", "password", "123456789",
+        "12345678", "qwerty", "abc123",
+        "password123", "admin", "admin123",
+        "letmein", "welcome", "iloveyou",
+        "111111", "000000", "123123"
     }
 
     password = input("Enter a sample password to check: ")
@@ -175,6 +166,8 @@ def detect_common_password():
     else:
         print("This password is not in our common password list.")
         print("Security Risk: Not identified by this check.")
+
+
 def detect_password_reuse():
     data = load_data()
 
@@ -188,11 +181,9 @@ def detect_password_reuse():
         password = item["password"]
         password_counts[password] = password_counts.get(password, 0) + 1
 
-    reused_passwords = {
-        password: count
-        for password, count in password_counts.items()
-        if count > 1
-    }
+    reused_passwords = [
+        count for count in password_counts.values() if count > 1
+    ]
 
     print("\nPASSWORD REUSE CHECK")
     print("--------------------------")
@@ -200,13 +191,15 @@ def detect_password_reuse():
     if reused_passwords:
         print("WARNING: Password reuse detected!")
 
-        for password, count in reused_passwords.items():
+        for count in reused_passwords:
             print("A password is used by", count, "accounts.")
 
         print("Security Risk: HIGH")
     else:
         print("No reused passwords detected.")
-        print("Security Risk: No reuse found.") 
+        print("Security Risk: No reuse found.")
+
+
 def search_password():
     data = load_data()
 
@@ -236,7 +229,9 @@ def search_password():
 
         print("Matches found:", len(results))
     else:
-        print("No matching website found.")   
+        print("No matching website found.")
+
+
 def delete_password():
     data = load_data()
 
@@ -259,17 +254,21 @@ def delete_password():
 
     if len(matching_accounts) > 1:
         print("Multiple matching accounts found.")
-        print("Please make sure the website and username identify one account.")
+        print("Please identify one account.")
         return
 
-    confirmation = input("Are you sure you want to delete this account? (yes/no): ")
+    confirmation = input(
+        "Are you sure you want to delete this account? (yes/no): "
+    )
 
     if confirmation.lower() == "yes":
         data.remove(matching_accounts[0])
         save_data(data)
         print("Account deleted successfully!")
     else:
-        print("Deletion cancelled.") 
+        print("Deletion cancelled.")
+
+
 def update_password():
     data = load_data()
 
@@ -292,7 +291,7 @@ def update_password():
 
     if len(matching_accounts) > 1:
         print("Multiple matching accounts found.")
-        print("Please make sure the website and username identify one account.")
+        print("Please identify one account.")
         return
 
     new_password = input("Enter new password: ")
@@ -302,7 +301,6 @@ def update_password():
         return
 
     matching_accounts[0]["password"] = new_password
-
     save_data(data)
 
-    print("Password updated successfully!")                           
+    print("Password updated successfully!")
