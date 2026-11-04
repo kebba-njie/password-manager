@@ -1,6 +1,8 @@
 import math
-from storage import load_data, save_data
+import secrets
+import string
 
+from storage import load_data, save_data
 
 def add_password():
     website = input("Website: ")
@@ -106,4 +108,40 @@ def calculate_password_entropy():
     elif entropy < 80:
         print("Security Level: STRONG")
     else:
-        print("Security Level: VERY STRONG")
+            print("Security Level: VERY STRONG")
+
+
+def generate_password():
+    try:
+        length = int(input("Enter desired password length (8-64): "))
+        if length < 8 or length > 64:
+            print("Password length must be between 8 and 64.")
+            return
+
+        lowercase = string.ascii_lowercase
+        uppercase = string.ascii_uppercase
+        digits = string.digits
+        symbols = string.punctuation
+
+        password = [
+            secrets.choice(lowercase),
+            secrets.choice(uppercase),
+            secrets.choice(digits),
+            secrets.choice(symbols)
+        ]
+
+        all_characters = lowercase + uppercase + digits + symbols
+
+        for _ in range(length - 4):
+            password.append(secrets.choice(all_characters))
+
+        secrets.SystemRandom().shuffle(password)
+
+        generated_password = "".join(password)
+
+        print("\nGENERATED PASSWORD")
+        print("--------------------------")
+        print(generated_password)
+
+    except ValueError:
+        print("Please enter a valid number.")
