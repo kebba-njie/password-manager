@@ -3,7 +3,8 @@ from manager import (
     view_passwords,
     analyze_password_strength,
     calculate_password_entropy,
-    generate_password
+    generate_password,
+    detect_common_password
 )
 
 
@@ -16,7 +17,8 @@ def main():
         print("3. Analyze password strength")
         print("4. Calculate password entropy")
         print("5. Generate secure password")
-        print("6. Exit")
+        print("6. Detect common passwords")
+        print("7. Exit")
 
         choice = input("Choose an option: ")
 
@@ -31,6 +33,8 @@ def main():
         elif choice == "5":
             generate_password()
         elif choice == "6":
+            detect_common_password()
+        elif choice == "7":
             print("Goodbye!")
             break
         else:

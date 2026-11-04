@@ -4,6 +4,7 @@ import string
 
 from storage import load_data, save_data
 
+
 def add_password():
     website = input("Website: ")
     username = input("Username: ")
@@ -44,19 +45,14 @@ def analyze_password_strength():
 
     if len(password) >= 8:
         score += 1
-
     if len(password) >= 12:
         score += 1
-
     if any(char.isupper() for char in password):
         score += 1
-
     if any(char.islower() for char in password):
         score += 1
-
     if any(char.isdigit() for char in password):
         score += 1
-
     if any(not char.isalnum() for char in password):
         score += 1
 
@@ -71,6 +67,8 @@ def analyze_password_strength():
         print("Strength: STRONG")
 
     print("Security Score:", score, "/ 6")
+
+
 def calculate_password_entropy():
     password = input("Enter a sample password: ")
 
@@ -82,13 +80,10 @@ def calculate_password_entropy():
 
     if any(char.islower() for char in password):
         pool_size += 26
-
     if any(char.isupper() for char in password):
         pool_size += 26
-
     if any(char.isdigit() for char in password):
         pool_size += 10
-
     if any(not char.isalnum() for char in password):
         pool_size += 32
 
@@ -108,12 +103,13 @@ def calculate_password_entropy():
     elif entropy < 80:
         print("Security Level: STRONG")
     else:
-            print("Security Level: VERY STRONG")
+        print("Security Level: VERY STRONG")
 
 
 def generate_password():
     try:
         length = int(input("Enter desired password length (8-64): "))
+
         if length < 8 or length > 64:
             print("Password length must be between 8 and 64.")
             return
@@ -137,11 +133,45 @@ def generate_password():
 
         secrets.SystemRandom().shuffle(password)
 
-        generated_password = "".join(password)
-
         print("\nGENERATED PASSWORD")
         print("--------------------------")
-        print(generated_password)
+        print("".join(password))
 
     except ValueError:
         print("Please enter a valid number.")
+
+
+def detect_common_password():
+    common_passwords = {
+        "123456",
+        "password",
+        "123456789",
+        "12345678",
+        "qwerty",
+        "abc123",
+        "password123",
+        "admin",
+        "admin123",
+        "letmein",
+        "welcome",
+        "iloveyou",
+        "111111",
+        "000000",
+        "123123"
+    }
+
+    password = input("Enter a sample password to check: ")
+
+    if not password:
+        print("Password cannot be empty.")
+        return
+
+    print("\nCOMMON PASSWORD CHECK")
+    print("--------------------------")
+
+    if password.lower() in common_passwords:
+        print("WARNING: This is a commonly used password!")
+        print("Security Risk: HIGH")
+    else:
+        print("This password is not in our common password list.")
+        print("Security Risk: Not identified by this check.")
