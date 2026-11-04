@@ -269,4 +269,40 @@ def delete_password():
         save_data(data)
         print("Account deleted successfully!")
     else:
-        print("Deletion cancelled.")                    
+        print("Deletion cancelled.") 
+def update_password():
+    data = load_data()
+
+    if not data:
+        print("No passwords saved yet.")
+        return
+
+    website = input("Enter website name: ").strip().lower()
+    username = input("Enter username: ").strip().lower()
+
+    matching_accounts = [
+        item for item in data
+        if item["website"].lower() == website
+        and item["username"].lower() == username
+    ]
+
+    if not matching_accounts:
+        print("No matching account found.")
+        return
+
+    if len(matching_accounts) > 1:
+        print("Multiple matching accounts found.")
+        print("Please make sure the website and username identify one account.")
+        return
+
+    new_password = input("Enter new password: ")
+
+    if len(new_password) < 8:
+        print("Password must be at least 8 characters long.")
+        return
+
+    matching_accounts[0]["password"] = new_password
+
+    save_data(data)
+
+    print("Password updated successfully!")                           
