@@ -1,3 +1,4 @@
+import math
 from storage import load_data, save_data
 
 
@@ -68,3 +69,41 @@ def analyze_password_strength():
         print("Strength: STRONG")
 
     print("Security Score:", score, "/ 6")
+def calculate_password_entropy():
+    password = input("Enter a sample password: ")
+
+    if not password:
+        print("Password cannot be empty.")
+        return
+
+    pool_size = 0
+
+    if any(char.islower() for char in password):
+        pool_size += 26
+
+    if any(char.isupper() for char in password):
+        pool_size += 26
+
+    if any(char.isdigit() for char in password):
+        pool_size += 10
+
+    if any(not char.isalnum() for char in password):
+        pool_size += 32
+
+    entropy = len(password) * math.log2(pool_size)
+
+    print("\nPASSWORD ENTROPY ANALYSIS")
+    print("--------------------------")
+    print("Password Length:", len(password))
+    print("Estimated Entropy:", round(entropy, 2), "bits")
+
+    if entropy < 28:
+        print("Security Level: VERY WEAK")
+    elif entropy < 36:
+        print("Security Level: WEAK")
+    elif entropy < 60:
+        print("Security Level: MODERATE")
+    elif entropy < 80:
+        print("Security Level: STRONG")
+    else:
+        print("Security Level: VERY STRONG")

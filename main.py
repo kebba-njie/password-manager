@@ -1,13 +1,20 @@
-from manager import add_password, view_passwords, analyze_password_strength
+from manager import (
+    add_password,
+    view_passwords,
+    analyze_password_strength,
+    calculate_password_entropy
+)
 
 
 def main():
     while True:
-        print("PASSWORD MANAGER")
+        print("\nPASSWORD MANAGER")
+        print("========================")
         print("1. Add password")
         print("2. View passwords")
         print("3. Analyze password strength")
-        print("4. Exit")
+        print("4. Calculate password entropy")
+        print("5. Exit")
 
         choice = input("Choose an option: ")
 
@@ -18,6 +25,8 @@ def main():
         elif choice == "3":
             analyze_password_strength()
         elif choice == "4":
+            calculate_password_entropy()
+        elif choice == "5":
             print("Goodbye!")
             break
         else:
