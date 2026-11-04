@@ -1,26 +1,28 @@
-from manager import add_password, view_passwords
+from manager import add_password, view_passwords, analyze_password_strength
+
 
 def main():
     while True:
-        print("\n🔐 PASSWORD MANAGER")
+        print("PASSWORD MANAGER")
         print("1. Add password")
         print("2. View passwords")
-        print("3. Exit")
+        print("3. Analyze password strength")
+        print("4. Exit")
 
         choice = input("Choose an option: ")
 
         if choice == "1":
             add_password()
-
         elif choice == "2":
             view_passwords()
-
         elif choice == "3":
+            analyze_password_strength()
+        elif choice == "4":
             print("Goodbye!")
             break
-
         else:
             print("Invalid option, try again.")
+
 
 if __name__ == "__main__":
     main()
