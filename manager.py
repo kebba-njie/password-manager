@@ -236,4 +236,37 @@ def search_password():
 
         print("Matches found:", len(results))
     else:
-        print("No matching website found.")               
+        print("No matching website found.")   
+def delete_password():
+    data = load_data()
+
+    if not data:
+        print("No passwords saved yet.")
+        return
+
+    website = input("Enter website name: ").strip().lower()
+    username = input("Enter username: ").strip().lower()
+
+    matching_accounts = [
+        item for item in data
+        if item["website"].lower() == website
+        and item["username"].lower() == username
+    ]
+
+    if not matching_accounts:
+        print("No matching account found.")
+        return
+
+    if len(matching_accounts) > 1:
+        print("Multiple matching accounts found.")
+        print("Please make sure the website and username identify one account.")
+        return
+
+    confirmation = input("Are you sure you want to delete this account? (yes/no): ")
+
+    if confirmation.lower() == "yes":
+        data.remove(matching_accounts[0])
+        save_data(data)
+        print("Account deleted successfully!")
+    else:
+        print("Deletion cancelled.")                    

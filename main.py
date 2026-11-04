@@ -6,7 +6,8 @@ from manager import (
     generate_password,
     detect_common_password,
     detect_password_reuse,
-    search_password
+    search_password,
+    delete_password
 )
 
 
@@ -22,7 +23,8 @@ def main():
         print("6. Detect common passwords")
         print("7. Detect password reuse")
         print("8. Search passwords")
-        print("9. Exit")
+        print("9. Delete saved password")
+        print("10. Exit")
 
         choice = input("Choose an option: ")
 
@@ -43,6 +45,8 @@ def main():
         elif choice == "8":
             search_password()
         elif choice == "9":
+            delete_password()
+        elif choice == "10":
             print("Goodbye!")
             break
         else:
