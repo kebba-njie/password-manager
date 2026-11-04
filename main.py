@@ -13,6 +13,8 @@ from manager import (
     check_password_expiration
 )
 
+from storage import restore_backup
+
 
 def main():
     while True:
@@ -30,7 +32,8 @@ def main():
         print("10. Update saved password")
         print("11. Export account report")
         print("12. Check password expiration")
-        print("13. Exit")
+        print("13. Restore password backup")
+        print("14. Exit")
 
         choice = input("Choose an option: ")
 
@@ -55,13 +58,16 @@ def main():
         elif choice == "10":
             update_password()
         elif choice == "11":
-         export_password_report()
+            export_password_report()
         elif choice == "12":
-         check_password_expiration()
+            check_password_expiration()
         elif choice == "13":
-         print("Goodbye!")
-         break
-        print("Invalid option, try again.")
+            restore_backup()
+        elif choice == "14":
+            print("Goodbye!")
+            break
+        else:
+            print("Invalid option, try again.")
 
 
 if __name__ == "__main__":
