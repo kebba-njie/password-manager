@@ -175,3 +175,35 @@ def detect_common_password():
     else:
         print("This password is not in our common password list.")
         print("Security Risk: Not identified by this check.")
+def detect_password_reuse():
+    data = load_data()
+
+    if len(data) < 2:
+        print("At least two saved accounts are needed.")
+        return
+
+    password_counts = {}
+
+    for item in data:
+        password = item["password"]
+        password_counts[password] = password_counts.get(password, 0) + 1
+
+    reused_passwords = {
+        password: count
+        for password, count in password_counts.items()
+        if count > 1
+    }
+
+    print("\nPASSWORD REUSE CHECK")
+    print("--------------------------")
+
+    if reused_passwords:
+        print("WARNING: Password reuse detected!")
+
+        for password, count in reused_passwords.items():
+            print("A password is used by", count, "accounts.")
+
+        print("Security Risk: HIGH")
+    else:
+        print("No reused passwords detected.")
+        print("Security Risk: No reuse found.")        
