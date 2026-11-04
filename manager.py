@@ -206,4 +206,34 @@ def detect_password_reuse():
         print("Security Risk: HIGH")
     else:
         print("No reused passwords detected.")
-        print("Security Risk: No reuse found.")        
+        print("Security Risk: No reuse found.") 
+def search_password():
+    data = load_data()
+
+    if not data:
+        print("No passwords saved yet.")
+        return
+
+    search_term = input("Enter website name to search: ").strip().lower()
+
+    if not search_term:
+        print("Search term cannot be empty.")
+        return
+
+    results = [
+        item for item in data
+        if search_term in item["website"].lower()
+    ]
+
+    print("\nPASSWORD SEARCH RESULTS")
+    print("--------------------------")
+
+    if results:
+        for item in results:
+            print("Website:", item["website"])
+            print("Username:", item["username"])
+            print("--------------------------")
+
+        print("Matches found:", len(results))
+    else:
+        print("No matching website found.")               
