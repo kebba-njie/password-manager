@@ -3,6 +3,8 @@ import math
 import secrets
 import string
 
+from datetime import datetime, timedelta
+
 from storage import load_data, save_data
 
 
@@ -16,12 +18,12 @@ def add_password():
     data.append({
         "website": website,
         "username": username,
-        "password": password
+        "password": password,
+        "last_updated": datetime.now().isoformat()
     })
 
     save_data(data)
     print("Password saved successfully!")
-
 
 def view_passwords():
     data = load_data()
@@ -292,7 +294,6 @@ def update_password():
 
     if len(matching_accounts) > 1:
         print("Multiple matching accounts found.")
-        print("Please identify one account.")
         return
 
     new_password = input("Enter new password: ")
@@ -302,6 +303,8 @@ def update_password():
         return
 
     matching_accounts[0]["password"] = new_password
+    matching_accounts[0]["last_updated"] = datetime.now().isoformat()
+
     save_data(data)
 
     print("Password updated successfully!")
@@ -329,4 +332,38 @@ def export_password_report():
         print("Passwords were excluded from the report.")
 
     except OSError:
-        print("Error: Could not export the account report.")    
+        print("Error: Could not export the account report.")
+def check_password_expiration():
+    data = load_data()
+
+    if not data:
+        print("No passwords saved yet.")
+        return
+
+    print("\nPASSWORD EXPIRATION CHECK")
+    print("--------------------------")
+
+    expiration_days = 90
+    current_date = datetime.now()
+
+    for item in data:
+        website = item["website"]
+        last_updated = item.get("last_updated")
+
+        if not last_updated:
+            print(website + ": Update date unavailable.")
+            continue
+
+        try:
+            update_date = datetime.fromisoformat(last_updated)
+            age = current_date - update_date
+
+            if age.days >= expiration_days:
+                print(website + ": WARNING - Password is older than 90 days!")
+            else:
+                remaining = expiration_days - age.days
+                print(website + ": Password is up to date.")
+                print("Days until expiration warning:", remaining)
+
+        except ValueError:
+            print(website + ": Invalid update date.")            

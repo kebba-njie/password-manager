@@ -9,7 +9,8 @@ from manager import (
     search_password,
     delete_password,
     update_password,
-    export_password_report
+    export_password_report,
+    check_password_expiration
 )
 
 
@@ -28,7 +29,8 @@ def main():
         print("9. Delete saved password")
         print("10. Update saved password")
         print("11. Export account report")
-        print("12. Exit")
+        print("12. Check password expiration")
+        print("13. Exit")
 
         choice = input("Choose an option: ")
 
@@ -55,8 +57,10 @@ def main():
         elif choice == "11":
          export_password_report()
         elif choice == "12":
+         check_password_expiration()
+        elif choice == "13":
          print("Goodbye!")
-        break
+         break
         print("Invalid option, try again.")
 
 
