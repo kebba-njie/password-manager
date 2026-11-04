@@ -8,7 +8,8 @@ from manager import (
     detect_password_reuse,
     search_password,
     delete_password,
-    update_password
+    update_password,
+    export_password_report
 )
 
 
@@ -26,7 +27,8 @@ def main():
         print("8. Search passwords")
         print("9. Delete saved password")
         print("10. Update saved password")
-        print("11. Exit")
+        print("11. Export account report")
+        print("12. Exit")
 
         choice = input("Choose an option: ")
 
@@ -51,10 +53,11 @@ def main():
         elif choice == "10":
             update_password()
         elif choice == "11":
-            print("Goodbye!")
-            break
-        else:
-            print("Invalid option, try again.")
+         export_password_report()
+        elif choice == "12":
+         print("Goodbye!")
+        break
+        print("Invalid option, try again.")
 
 
 if __name__ == "__main__":

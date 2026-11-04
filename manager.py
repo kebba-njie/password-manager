@@ -1,3 +1,4 @@
+import csv
 import math
 import secrets
 import string
@@ -304,3 +305,28 @@ def update_password():
     save_data(data)
 
     print("Password updated successfully!")
+def export_password_report():
+    data = load_data()
+
+    if not data:
+        print("No passwords available to export.")
+        return
+
+    try:
+        with open("password_report.csv", "w", newline="", encoding="utf-8") as file:
+            writer = csv.writer(file)
+
+            writer.writerow(["Website", "Username"])
+
+            for item in data:
+                writer.writerow([
+                    item["website"],
+                    item["username"]
+                ])
+
+        print("Account report exported successfully!")
+        print("File created: password_report.csv")
+        print("Passwords were excluded from the report.")
+
+    except OSError:
+        print("Error: Could not export the account report.")    
