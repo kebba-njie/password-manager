@@ -595,3 +595,112 @@ def generate_security_audit():
 
     print("\nNote: This report does not display actual passwords.")
     print("================================")
+def export_password_data():
+    data = load_data()
+
+    if not data:
+        print("No password data available to export.")
+        return
+
+    filename = "password_export.csv"
+
+    try:
+        with open(filename, "w", newline="", encoding="utf-8") as file:
+            fieldnames = [
+                "website",
+                "username",
+                "password",
+                "last_updated"
+            ]
+
+            writer = csv.DictWriter(file, fieldnames=fieldnames)
+            writer.writeheader()
+
+            for item in data:
+                if valid_account(item):
+                    writer.writerow({
+                        "website": item["website"],
+                        "username": item["username"],
+                        "password": item["password"],
+                        "last_updated": item.get("last_updated", "")
+                    })
+
+        print("Password data exported successfully!")
+        print("Export file:", filename)
+        print("Warning: Keep this CSV file private.")
+
+    except (OSError, csv.Error) as error:
+        print("Export failed:", error)
+
+
+def import_password_data():
+    filename = "password_export.csv"
+
+    try:
+        with open(filename, "r", newline="", encoding="utf-8") as file:
+            reader = csv.DictReader(file)
+
+            required_fields = {
+                "website",
+                "username",
+                "password",
+                "last_updated"
+            }
+
+            if not reader.fieldnames or not required_fields.issubset(
+                set(reader.fieldnames)
+            ):
+                print("Invalid CSV format.")
+                return
+
+            existing_data = load_data()
+            imported = 0
+            skipped = 0
+
+            for row in reader:
+                if not row.get("website") or not row.get("username"):
+                    skipped += 1
+                    continue
+
+                if not row.get("password"):
+                    skipped += 1
+                    continue
+
+                account = {
+                    "website": row["website"].strip(),
+                    "username": row["username"].strip(),
+                    "password": row["password"],
+                    "last_updated": row.get("last_updated", "").strip()
+                }
+
+                if not valid_account(account):
+                    skipped += 1
+                    continue
+
+                duplicate = any(
+                    item.get("website") == account["website"]
+                    and item.get("username") == account["username"]
+                    for item in existing_data
+                    if isinstance(item, dict)
+                )
+
+                if duplicate:
+                    skipped += 1
+                    continue
+
+                existing_data.append(account)
+                imported += 1
+
+            if imported > 0:
+                save_data(existing_data)
+
+            print("\nIMPORT SUMMARY")
+            print("----------------------")
+            print("Records imported:", imported)
+            print("Records skipped:", skipped)
+
+    except FileNotFoundError:
+        print("Import file not found:", filename)
+
+    except (OSError, csv.Error, ValueError, TypeError) as error:
+        print("Import failed:", error)    

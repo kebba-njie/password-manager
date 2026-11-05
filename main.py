@@ -11,7 +11,9 @@ from manager import (
     update_password,
     export_password_report,
     check_password_expiration,
-    generate_security_audit
+    generate_security_audit,
+    export_password_data,
+    import_password_data
 )
 
 from storage import restore_backup, migrate_to_master_encryption
@@ -19,7 +21,6 @@ from security import initialize_master_password
 
 
 def main():
-
     # Master password authentication
     if not initialize_master_password():
         print("Access denied. Application closing.")
@@ -48,7 +49,9 @@ def main():
         print("12. Check password expiration")
         print("13. Restore password backup")
         print("14. Generate security audit report")
-        print("15. Exit")
+        print("15. Export password data")
+        print("16. Import password data")
+        print("17. Exit")
 
         choice = input("Choose an option: ").strip()
 
@@ -81,6 +84,10 @@ def main():
         elif choice == "14":
             generate_security_audit()
         elif choice == "15":
+            export_password_data()
+        elif choice == "16":
+            import_password_data()
+        elif choice == "17":
             print("Goodbye!")
             break
         else:

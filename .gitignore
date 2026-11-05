@@ -20,3 +20,4 @@ secret.key
 password_report.csv
 master.salt
 master.verifier
+password_export.csv
