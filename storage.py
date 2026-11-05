@@ -29,14 +29,14 @@ def read_data_file(filename):
     with open(filename, "rb") as file:
         raw_data = file.read()
 
-    # Support existing plaintext vaults during migration.
+    # Support older plaintext files.
     try:
         data = json.loads(raw_data.decode("utf-8"))
         return data, False
     except (UnicodeDecodeError, json.JSONDecodeError):
         pass
 
-    # Otherwise, decrypt the encrypted file.
+    # Decrypt encrypted files.
     decrypted_data = decrypt_data(raw_data)
     return json.loads(decrypted_data), True
 
@@ -60,14 +60,13 @@ def load_data():
             print("Error: Vault data is invalid.")
             return []
 
-        # Automatically encrypt an older plaintext vault.
         if not encrypted:
             write_encrypted_data(FILE_NAME, data)
             print("Existing vault successfully encrypted.")
 
         return data
 
-    except (OSError, ValueError, json.JSONDecodeError, InvalidToken):
+    except (OSError, ValueError, InvalidToken):
         print("Error: Unable to read the password vault.")
         return []
 
@@ -83,7 +82,7 @@ def save_data(data):
             else:
                 print("Warning: Existing data is invalid. Backup not updated.")
 
-        except (OSError, ValueError, json.JSONDecodeError, InvalidToken):
+        except (OSError, ValueError, InvalidToken):
             print("Warning: Existing vault could not be validated.")
 
     write_encrypted_data(FILE_NAME, data)
@@ -107,5 +106,40 @@ def restore_backup():
         print("Backup validation successful.")
         print("Encrypted backup restored successfully!")
 
-    except (OSError, ValueError, json.JSONDecodeError, InvalidToken):
+    except (OSError, ValueError, InvalidToken):
         print("Unable to restore backup. The backup may be damaged.")
+
+
+def migrate_to_master_encryption():
+
+    # Migrate the main password vault.
+    if os.path.exists(FILE_NAME):
+        try:
+            data, _ = read_data_file(FILE_NAME)
+
+            if not validate_backup_data(data):
+                print("Vault migration failed: Invalid data.")
+                return False
+
+            write_encrypted_data(FILE_NAME, data)
+            print("Password vault migrated successfully.")
+
+        except (OSError, ValueError, InvalidToken):
+            print("Vault migration failed. Existing data was preserved.")
+            return False
+
+    # Migrate the password backup.
+    if os.path.exists(BACKUP_FILE):
+        try:
+            backup_data, _ = read_data_file(BACKUP_FILE)
+
+            if not validate_backup_data(backup_data):
+                print("Warning: Backup data is invalid.")
+            else:
+                write_encrypted_data(BACKUP_FILE, backup_data)
+                print("Password backup migrated successfully.")
+
+        except (OSError, ValueError, InvalidToken):
+            print("Warning: Backup migration could not be completed.")
+
+    return True

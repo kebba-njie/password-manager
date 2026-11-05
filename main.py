@@ -13,10 +13,23 @@ from manager import (
     check_password_expiration
 )
 
-from storage import restore_backup
+from storage import restore_backup, migrate_to_master_encryption
+from security import initialize_master_password
 
 
 def main():
+
+    # Master password authentication
+    if not initialize_master_password():
+        print("Access denied. Application closing.")
+        return
+
+    # Migrate existing encrypted vault
+    if not migrate_to_master_encryption():
+        print("Vault migration failed. Application closing.")
+        return
+
+    # Main password manager menu
     while True:
         print("\nPASSWORD MANAGER")
         print("========================")
