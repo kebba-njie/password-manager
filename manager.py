@@ -438,7 +438,6 @@ def export_password_report():
     except (OSError, csv.Error, UnicodeError):
         print("Error: Could not export the account report.")
 
-
 def check_password_expiration():
     data = load_data()
 
@@ -466,6 +465,9 @@ def check_password_expiration():
         try:
             update_date = datetime.fromisoformat(last_updated)
 
+            if update_date.tzinfo is not None:
+                update_date = update_date.replace(tzinfo=None)
+
             if update_date > current_date:
                 print(website + ": Invalid future update date.")
                 continue
@@ -484,3 +486,112 @@ def check_password_expiration():
 
         except (ValueError, TypeError):
             print(website + ": Invalid update date.")
+
+
+def generate_security_audit():
+    data = load_data()
+
+    if not data:
+        print("No passwords available for security auditing.")
+        return
+
+    common_passwords = {
+        "123456", "password", "123456789",
+        "12345678", "qwerty", "abc123",
+        "password123", "admin", "admin123",
+        "letmein", "welcome", "iloveyou",
+        "111111", "000000", "123123"
+    }
+
+    total_accounts = 0
+    weak_passwords = 0
+    common_count = 0
+    expired_count = 0
+
+    password_counts = {}
+    current_date = datetime.now()
+
+    for item in data:
+        if not valid_account(item):
+            continue
+
+        total_accounts += 1
+        password = item["password"]
+
+        # Check password strength.
+        score = 0
+
+        if len(password) >= 8:
+            score += 1
+        if len(password) >= 12:
+            score += 1
+        if any(char.isupper() for char in password):
+            score += 1
+        if any(char.islower() for char in password):
+            score += 1
+        if any(char.isdigit() for char in password):
+            score += 1
+        if any(not char.isalnum() for char in password):
+            score += 1
+
+        if score <= 2:
+            weak_passwords += 1
+
+        # Check common passwords.
+        if password.lower() in common_passwords:
+            common_count += 1
+
+        # Count password usage.
+        password_counts[password] = (
+            password_counts.get(password, 0) + 1
+        )
+
+        # Check password age.
+        last_updated = item.get("last_updated")
+
+        if last_updated:
+            try:
+                update_date = datetime.fromisoformat(last_updated)
+
+                if update_date.tzinfo is not None:
+                    update_date = update_date.replace(tzinfo=None)
+
+                if update_date <= current_date:
+                    age = current_date - update_date
+
+                    if age.days >= PASSWORD_EXPIRATION_DAYS:
+                        expired_count += 1
+
+            except (ValueError, TypeError):
+                pass
+
+    reused_count = sum(
+        count for count in password_counts.values()
+        if count > 1
+    )
+
+    print("\nPASSWORD SECURITY AUDIT REPORT")
+    print("================================")
+    print("Total accounts audited:", total_accounts)
+    print("Weak passwords:", weak_passwords)
+    print("Common passwords:", common_count)
+    print("Accounts using reused passwords:", reused_count)
+    print("Passwords older than 90 days:", expired_count)
+
+    print("\nSECURITY ASSESSMENT")
+    print("--------------------------")
+
+    if total_accounts == 0:
+        print("No valid accounts were available for auditing.")
+        return
+
+    issues = weak_passwords + common_count + expired_count
+
+    if issues == 0 and reused_count == 0:
+        print("GOOD: No issues were detected by this audit.")
+    else:
+        print("WARNING: Security issues were detected.")
+        print("Review your passwords and update vulnerable accounts.")
+
+    print("\nNote: This report does not display actual passwords.")
+    print("================================")

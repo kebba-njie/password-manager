@@ -10,7 +10,8 @@ from manager import (
     delete_password,
     update_password,
     export_password_report,
-    check_password_expiration
+    check_password_expiration,
+    generate_security_audit
 )
 
 from storage import restore_backup, migrate_to_master_encryption
@@ -46,9 +47,10 @@ def main():
         print("11. Export account report")
         print("12. Check password expiration")
         print("13. Restore password backup")
-        print("14. Exit")
+        print("14. Generate security audit report")
+        print("15. Exit")
 
-        choice = input("Choose an option: ")
+        choice = input("Choose an option: ").strip()
 
         if choice == "1":
             add_password()
@@ -77,6 +79,8 @@ def main():
         elif choice == "13":
             restore_backup()
         elif choice == "14":
+            generate_security_audit()
+        elif choice == "15":
             print("Goodbye!")
             break
         else:
