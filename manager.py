@@ -3,17 +3,80 @@ import math
 import secrets
 import string
 
-from datetime import datetime, timedelta
+from datetime import datetime
 
 from storage import load_data, save_data
 
 
+MIN_PASSWORD_LENGTH = 8
+MAX_PASSWORD_LENGTH = 64
+PASSWORD_EXPIRATION_DAYS = 90
+
+
+def get_required_input(prompt):
+    """Request input and reject empty or whitespace-only values."""
+    value = input(prompt).strip()
+
+    if not value:
+        print("Input cannot be empty.")
+        return None
+
+    return value
+
+
+def save_changes(data):
+    """Save changes and handle unexpected storage errors."""
+    try:
+        save_data(data)
+        return True
+
+    except (OSError, ValueError, TypeError, RuntimeError):
+        print("Error: Unable to save changes.")
+        return False
+
+
+def valid_account(item):
+    """Check whether an account contains the required fields."""
+    if not isinstance(item, dict):
+        return False
+
+    required_fields = ["website", "username", "password"]
+
+    return all(
+        isinstance(item.get(field), str) and item[field].strip()
+        for field in required_fields
+    )
+
+
 def add_password():
-    website = input("Website: ")
-    username = input("Username: ")
+    website = get_required_input("Website: ")
+    if website is None:
+        return
+
+    username = get_required_input("Username: ")
+    if username is None:
+        return
+
     password = input("Password: ")
 
+    if not password.strip():
+        print("Password cannot be empty.")
+        return
+
+    if len(password) < MIN_PASSWORD_LENGTH:
+        print("Password must be at least 8 characters long.")
+        return
+
     data = load_data()
+
+    if any(
+        valid_account(item)
+        and item["website"].lower() == website.lower()
+        and item["username"].lower() == username.lower()
+        for item in data
+    ):
+        print("This account already exists.")
+        return
 
     data.append({
         "website": website,
@@ -22,8 +85,9 @@ def add_password():
         "last_updated": datetime.now().isoformat()
     })
 
-    save_data(data)
-    print("Password saved successfully!")
+    if save_changes(data):
+        print("Password saved successfully!")
+
 
 def view_passwords():
     data = load_data()
@@ -36,6 +100,10 @@ def view_passwords():
     print("----------------------")
 
     for item in data:
+        if not valid_account(item):
+            print("Warning: Invalid account record skipped.")
+            continue
+
         print("Website:", item["website"])
         print("Username:", item["username"])
         print("Password: ********")
@@ -44,6 +112,10 @@ def view_passwords():
 
 def analyze_password_strength():
     password = input("Enter a sample password to analyze: ")
+
+    if not password.strip():
+        print("Password cannot be empty.")
+        return
 
     score = 0
 
@@ -76,7 +148,7 @@ def analyze_password_strength():
 def calculate_password_entropy():
     password = input("Enter a sample password: ")
 
-    if not password:
+    if not password.strip():
         print("Password cannot be empty.")
         return
 
@@ -114,7 +186,7 @@ def generate_password():
     try:
         length = int(input("Enter desired password length (8-64): "))
 
-        if length < 8 or length > 64:
+        if not MIN_PASSWORD_LENGTH <= length <= MAX_PASSWORD_LENGTH:
             print("Password length must be between 8 and 64.")
             return
 
@@ -156,7 +228,7 @@ def detect_common_password():
 
     password = input("Enter a sample password to check: ")
 
-    if not password:
+    if not password.strip():
         print("Password cannot be empty.")
         return
 
@@ -174,13 +246,15 @@ def detect_common_password():
 def detect_password_reuse():
     data = load_data()
 
-    if len(data) < 2:
-        print("At least two saved accounts are needed.")
+    accounts = [item for item in data if valid_account(item)]
+
+    if len(accounts) < 2:
+        print("At least two valid saved accounts are needed.")
         return
 
     password_counts = {}
 
-    for item in data:
+    for item in accounts:
         password = item["password"]
         password_counts[password] = password_counts.get(password, 0) + 1
 
@@ -210,15 +284,17 @@ def search_password():
         print("No passwords saved yet.")
         return
 
-    search_term = input("Enter website name to search: ").strip().lower()
+    search_term = get_required_input("Enter website name to search: ")
 
-    if not search_term:
-        print("Search term cannot be empty.")
+    if search_term is None:
         return
+
+    search_term = search_term.lower()
 
     results = [
         item for item in data
-        if search_term in item["website"].lower()
+        if valid_account(item)
+        and search_term in item["website"].lower()
     ]
 
     print("\nPASSWORD SEARCH RESULTS")
@@ -242,13 +318,19 @@ def delete_password():
         print("No passwords saved yet.")
         return
 
-    website = input("Enter website name: ").strip().lower()
-    username = input("Enter username: ").strip().lower()
+    website = get_required_input("Enter website name: ")
+    if website is None:
+        return
+
+    username = get_required_input("Enter username: ")
+    if username is None:
+        return
 
     matching_accounts = [
         item for item in data
-        if item["website"].lower() == website
-        and item["username"].lower() == username
+        if valid_account(item)
+        and item["website"].lower() == website.lower()
+        and item["username"].lower() == username.lower()
     ]
 
     if not matching_accounts:
@@ -257,19 +339,24 @@ def delete_password():
 
     if len(matching_accounts) > 1:
         print("Multiple matching accounts found.")
-        print("Please identify one account.")
+        print("Please resolve the duplicate records first.")
         return
 
     confirmation = input(
         "Are you sure you want to delete this account? (yes/no): "
-    )
+    ).strip().lower()
 
-    if confirmation.lower() == "yes":
+    if confirmation == "yes":
         data.remove(matching_accounts[0])
-        save_data(data)
-        print("Account deleted successfully!")
-    else:
+
+        if save_changes(data):
+            print("Account deleted successfully!")
+
+    elif confirmation == "no":
         print("Deletion cancelled.")
+
+    else:
+        print("Invalid confirmation. Deletion cancelled.")
 
 
 def update_password():
@@ -279,13 +366,19 @@ def update_password():
         print("No passwords saved yet.")
         return
 
-    website = input("Enter website name: ").strip().lower()
-    username = input("Enter username: ").strip().lower()
+    website = get_required_input("Enter website name: ")
+    if website is None:
+        return
+
+    username = get_required_input("Enter username: ")
+    if username is None:
+        return
 
     matching_accounts = [
         item for item in data
-        if item["website"].lower() == website
-        and item["username"].lower() == username
+        if valid_account(item)
+        and item["website"].lower() == website.lower()
+        and item["username"].lower() == username.lower()
     ]
 
     if not matching_accounts:
@@ -298,16 +391,21 @@ def update_password():
 
     new_password = input("Enter new password: ")
 
-    if len(new_password) < 8:
+    if not new_password.strip():
+        print("Password cannot be empty.")
+        return
+
+    if len(new_password) < MIN_PASSWORD_LENGTH:
         print("Password must be at least 8 characters long.")
         return
 
     matching_accounts[0]["password"] = new_password
     matching_accounts[0]["last_updated"] = datetime.now().isoformat()
 
-    save_data(data)
+    if save_changes(data):
+        print("Password updated successfully!")
 
-    print("Password updated successfully!")
+
 def export_password_report():
     data = load_data()
 
@@ -316,23 +414,31 @@ def export_password_report():
         return
 
     try:
-        with open("password_report.csv", "w", newline="", encoding="utf-8") as file:
-            writer = csv.writer(file)
+        with open(
+            "password_report.csv",
+            "w",
+            newline="",
+            encoding="utf-8"
+        ) as file:
 
+            writer = csv.writer(file)
             writer.writerow(["Website", "Username"])
 
             for item in data:
-                writer.writerow([
-                    item["website"],
-                    item["username"]
-                ])
+                if valid_account(item):
+                    writer.writerow([
+                        item["website"],
+                        item["username"]
+                    ])
 
         print("Account report exported successfully!")
         print("File created: password_report.csv")
         print("Passwords were excluded from the report.")
 
-    except OSError:
+    except (OSError, csv.Error, UnicodeError):
         print("Error: Could not export the account report.")
+
+
 def check_password_expiration():
     data = load_data()
 
@@ -343,10 +449,13 @@ def check_password_expiration():
     print("\nPASSWORD EXPIRATION CHECK")
     print("--------------------------")
 
-    expiration_days = 90
     current_date = datetime.now()
 
     for item in data:
+        if not valid_account(item):
+            print("Invalid account record skipped.")
+            continue
+
         website = item["website"]
         last_updated = item.get("last_updated")
 
@@ -356,14 +465,22 @@ def check_password_expiration():
 
         try:
             update_date = datetime.fromisoformat(last_updated)
+
+            if update_date > current_date:
+                print(website + ": Invalid future update date.")
+                continue
+
             age = current_date - update_date
 
-            if age.days >= expiration_days:
-                print(website + ": WARNING - Password is older than 90 days!")
+            if age.days >= PASSWORD_EXPIRATION_DAYS:
+                print(
+                    website
+                    + ": WARNING - Password is older than 90 days!"
+                )
             else:
-                remaining = expiration_days - age.days
+                remaining = PASSWORD_EXPIRATION_DAYS - age.days
                 print(website + ": Password is up to date.")
                 print("Days until expiration warning:", remaining)
 
-        except ValueError:
-            print(website + ": Invalid update date.")            
+        except (ValueError, TypeError):
+            print(website + ": Invalid update date.")
